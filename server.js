@@ -28,7 +28,7 @@ const CONFIG_PATH = path.join(CONFIG_DIR, 'config.json');
 const DEFAULT_CONFIG = {
   theme: 'dark',
   lang: 'zh',
-  layout: 'split'
+  layout: 'editor'
 };
 
 /** 从磁盘读取原始配置对象，失败返回 null */

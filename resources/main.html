@@ -65,7 +65,7 @@ body {
   flex:1; display:flex; flex-direction:column; overflow:hidden;
   position:relative;
 }
-.pane:first-child{border-right:1px solid var(--border)}
+.layout-split .pane:first-child{border-right:1px solid var(--border)}
 /* Layout modes */
 .layout-editor #preview-pane{display:none}
 .layout-preview #editor-pane{display:none}
@@ -107,6 +107,13 @@ body {
 .pane-body::-webkit-scrollbar-thumb:hover{background:var(--text-secondary)}
 .dragover-active .editor-textarea,
 .dragover-active .pane-body{border:2px dashed var(--accent);opacity:.6}
+/* When print overlay is active, hide main content */
+body.print-active .app-header,
+body.print-active .main-container,
+body.print-active .status-bar,
+body.print-active .drop-overlay{
+  display:none!important
+}
 .toast{
   position:fixed; bottom:28px; left:50%; transform:translateX(-50%);
   background:var(--accent); color:var(--bg);
@@ -134,7 +141,7 @@ body {
 /* Splash screen */
 #splash{
   position:fixed; inset:0; z-index:9999;
-  display:none; flex-direction:column;
+  display:flex; flex-direction:column;
   align-items:center; justify-content:center;
   background:#000;
 }
@@ -262,12 +269,13 @@ body {
 .print-page .preview-line{margin:0; padding:1px 0; min-height:1.5em;white-space:pre-wrap;word-break:break-word}
 .print-page .preview-line.empty-line{height:1.2em}
 @media print{
+  body{background:var(--print-bg,#fff)!important}
   body>*:not(#print-overlay){display:none!important}
   #print-overlay{position:static;display:flex!important;background:var(--print-bg,#fff);color:var(--print-fg,#222)}
   #print-toolbar,#print-settings{display:none!important}
-  #print-pages{padding:0;background:none;overflow:visible;gap:0}
+  #print-pages{padding:0;background:var(--print-bg,#fff);overflow:visible;gap:0}
   #print-pages.continuous .print-page,
-  .print-page{height:auto!important;overflow:visible!important;box-shadow:none;width:100%;max-width:none;margin:0;page-break-after:always}
+  .print-page{height:auto!important;min-height:100vh!important;overflow:visible!important;box-shadow:none;width:100%;max-width:none;margin:0;page-break-after:always}
   .print-page:last-child{page-break-after:auto}
 }
 </style>
@@ -394,8 +402,6 @@ body {
     const splash = document.getElementById('splash');
     const titleEl = document.getElementById('splash-title');
     const subtitleEl = document.getElementById('splash-subtitle');
-
-    splash.style.display = 'flex';
 
     // Build character spans with smooth slide-up animation
     const title = 'Monote';
@@ -639,7 +645,7 @@ body {
   // ── Layout ──
   const LAYOUTS_DESKTOP = ['split', 'editor', 'preview'];
   const LAYOUTS_MOBILE = ['editor', 'preview'];
-  let layoutMode = 'split';
+  let layoutMode = 'editor';
 
   function applyLayout() {
     const container = document.querySelector('.main-container');
@@ -1128,7 +1134,9 @@ body {
     const src = document.getElementById('preview');
     const settings = getPrintSettings();
 
-    // Set CSS variables on print pages container
+    // Set CSS variables on root and print pages container
+    document.documentElement.style.setProperty('--print-bg', settings.bgColor);
+    document.documentElement.style.setProperty('--print-fg', settings.fgColor);
     printPages.style.setProperty('--print-bg', settings.bgColor);
     printPages.style.setProperty('--print-fg', settings.fgColor);
     printPages.style.setProperty('--print-line-height', String(settings.lineSpacing));
@@ -1175,12 +1183,14 @@ body {
 
   function openPrintPreview() {
     buildPrintPages();
+    document.body.classList.add('print-active');
     printOverlay.style.display = 'flex';
     toast(t('printLoad'));
   }
 
   function closePrintPreview() {
     printOverlay.style.display = 'none';
+    document.body.classList.remove('print-active');
   }
 
   // ── Bindings ──
@@ -1253,7 +1263,7 @@ body {
     const initLang = cfg.lang || 'zh';
     lang = (initLang === 'en') ? 'en' : 'zh';
     // Layout
-    layoutMode = cfg.layout || 'split';
+    layoutMode = cfg.layout || 'editor';
     applyLayout();
     applyLang();
     render();
