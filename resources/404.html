@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>404 — Monote</title>
+<style>
+:root {
+  --bg: #f8f6f0; --bg-card: #ffffff; --bg-input: #f3f1eb;
+  --text: #2c2c2c; --text-secondary: #6b6b6b;
+  --border: #d0cec6; --border-focus: #2c2c2c;
+  --accent: #2c2c2c; --accent-hover: #555;
+  --error: #b33a3a; --error-bg: #fdf0f0; --success: #3a7b3a;
+  --shadow: rgba(0,0,0,0.04); --shadow-hover: rgba(0,0,0,0.07);
+  --header-bg: #f8f6f0;
+}
+[data-theme="dark"] {
+  --bg: #111115; --bg-card: #1a1a1f; --bg-input: #222228;
+  --text: #e0e0e0; --text-secondary: #999;
+  --border: #333340; --border-focus: #888;
+  --accent: #e0e0e0; --accent-hover: #bbb;
+  --error: #e06060; --error-bg: #2a1515; --success: #60b060;
+  --shadow: rgba(0,0,0,0.2); --shadow-hover: rgba(0,0,0,0.3);
+  --header-bg: #111115;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:"DengXian Light","DengXian","Microsoft YaHei Light","微软雅黑 Light","Noto Sans SC",sans-serif;
+  background:var(--bg); color:var(--text); line-height:1.7;
+  transition:background .3s,color .3s;
+  height:100vh; overflow:hidden;
+  display:flex; flex-direction:column;
+}
+.app-header {
+  flex-shrink:0;
+  border-bottom:1px solid var(--border);padding:0 28px;height:52px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--bg); transition:background .3s,border-color .3s;
+}
+.app-header .logo{font-size:16px;letter-spacing:1.5px;font-weight:300;color:var(--text-secondary)}
+.header-actions{display:flex;gap:8px;align-items:center;flex-shrink:0}
+.header-actions button{
+  background:none;border:1px solid var(--border);height:34px;padding:0 14px;
+  font-family:inherit;font-size:13px;color:var(--text);cursor:pointer;
+  letter-spacing:.5px;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.header-actions button:hover{background:var(--bg-input);border-color:var(--text)}
+.header-actions button:active{transform:scale(0.93)}
+.error-container{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:40px 24px;text-align:center;
+}
+.error-code{
+  font-size:96px;font-weight:100;letter-spacing:8px;
+  color:var(--text);opacity:.15;line-height:1;margin-bottom:12px;
+}
+.error-title{
+  font-size:24px;font-weight:400;letter-spacing:2px;
+  margin-bottom:10px;
+}
+.error-desc{
+  font-size:15px;color:var(--text-secondary);letter-spacing:.3px;
+  max-width:480px;margin-bottom:8px;
+}
+.error-path{
+  display:inline-block;
+  font-size:13px;color:var(--error);letter-spacing:.3px;
+  background:var(--error-bg);padding:4px 14px;margin-bottom:30px;
+  word-break:break-all;max-width:100%;
+}
+.action-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.btn{
+  display:inline-flex;align-items:center;gap:6px;
+  background:none;border:1px solid var(--border);height:38px;padding:0 22px;
+  font-family:inherit;font-size:13px;color:var(--text);cursor:pointer;
+  letter-spacing:.5px;text-decoration:none;transition:all .2s;
+}
+.btn:hover{background:var(--bg-input);border-color:var(--text)}
+.btn-primary{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.btn-primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+.btn:active{transform:scale(0.93)}
+@media(max-width:720px){
+  .app-header{padding:0 16px}
+  .app-header .logo{font-size:14px}
+  .error-code{font-size:72px}
+  .error-title{font-size:20px}
+}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="logo" id="app-title">Monote</div>
+  <div class="header-actions">
+    <button class="lang-toggle" id="btn-lang" title="Switch language">EN</button>
+    <button class="theme-toggle" id="theme-toggle" title="Toggle theme">&#9681;</button>
+  </div>
+</header>
+
+<div class="error-container">
+  <div class="error-code">404</div>
+  <div class="error-title" id="err-title">页面未找到</div>
+  <div class="error-desc" id="err-desc">您访问的路径在 Monote 上不存在，可能已被移动或删除。</div>
+  <div class="error-path" id="err-path"></div>
+  <div class="action-row">
+    <a class="btn btn-primary" id="btn-home" href="/">&#8592; <span id="btn-home-text">返回首页</span></a>
+    <button class="btn" id="btn-back" onclick="history.back()">&#8592; <span id="btn-back-text">后退</span></button>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  // ── Locale ──
+  const LOCALE = {
+    zh: {
+      title: '404 — Monote',
+      appTitle: 'Monote',
+      errTitle: '页面未找到',
+      errDesc: '您访问的路径在 Monote 上不存在，可能已被移动或删除。',
+      btnHome: '返回首页',
+      btnBack: '后退',
+      btnLang: 'EN',
+    },
+    en: {
+      title: '404 — Monote',
+      appTitle: 'Monote',
+      errTitle: 'Page Not Found',
+      errDesc: 'The path you requested does not exist on Monote. It may have been moved or deleted.',
+      btnHome: 'Back to Home',
+      btnBack: 'Go Back',
+      btnLang: '中',
+    }
+  };
+
+  let lang = 'zh';
+
+  function t(key) {
+    return (LOCALE[lang] && LOCALE[lang][key]) || (LOCALE.zh[key]) || key;
+  }
+
+  function loadConfig() {
+    try {
+      const raw = localStorage.getItem('lite-editor-config');
+      if (raw) return JSON.parse(raw);
+    } catch (_) {}
+    return {};
+  }
+  function saveConfig(obj) {
+    try {
+      const cur = loadConfig();
+      for (const k in obj) cur[k] = obj[k];
+      localStorage.setItem('lite-editor-config', JSON.stringify(cur));
+    } catch (_) {}
+  }
+
+  // ── Theme ──
+  function applyTheme(t) { document.documentElement.setAttribute('data-theme', t); }
+  function setURLTheme(t) {
+    const u = new URL(window.location);
+    u.searchParams.set('theme', t);
+    window.history.replaceState(null, '', u);
+  }
+  const urlTheme = new URLSearchParams(window.location.search).get('theme');
+  const cfg = loadConfig();
+  applyTheme((urlTheme === 'light' || urlTheme === 'dark') ? urlTheme : (cfg.theme || 'dark'));
+  setURLTheme(document.documentElement.getAttribute('data-theme'));
+
+  document.getElementById('theme-toggle').addEventListener('click', function(){
+    const r = document.documentElement;
+    const t = r.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    r.setAttribute('data-theme', t);
+    setURLTheme(t);
+    saveConfig({ theme: t });
+  });
+
+  // ── Language ──
+  document.getElementById('btn-lang').addEventListener('click', function(){
+    lang = (lang === 'zh') ? 'en' : 'zh';
+    applyLang();
+    saveConfig({ lang: lang });
+  });
+  const urlLang = new URLSearchParams(window.location.search).get('lang');
+  lang = (urlLang === 'en' || urlLang === 'zh') ? urlLang : (cfg.lang || 'zh');
+
+  function applyLang() {
+    document.documentElement.setAttribute('lang', lang === 'en' ? 'en' : 'zh-CN');
+    document.title = t('title');
+    document.getElementById('app-title').textContent = t('appTitle');
+    document.getElementById('err-title').textContent = t('errTitle');
+    document.getElementById('err-desc').textContent = t('errDesc');
+    document.getElementById('btn-home-text').textContent = t('btnHome');
+    document.getElementById('btn-back-text').textContent = t('btnBack');
+    document.getElementById('btn-lang').textContent = t('btnLang');
+  }
+
+  applyLang();
+
+  // ── Show requested path ──
+  const params = new URLSearchParams(window.location.search);
+  const requestedPath = params.get('path');
+  const pathEl = document.getElementById('err-path');
+  if (requestedPath) {
+    pathEl.textContent = requestedPath;
+  } else {
+    pathEl.style.display = 'none';
+  }
+
+})();
+</script>
+</body>
+</html>
