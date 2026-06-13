@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>帮助 — Monote</title>
+<style>
+::root {
+  --bg: #f8f6f0; --bg-card: #ffffff; --bg-input: #f3f1eb;
+  --text: #2c2c2c; --text-secondary: #6b6b6b;
+  --border: #d0cec6; --border-focus: #2c2c2c;
+  --accent: #2c2c2c; --accent-hover: #555;
+  --error: #b33a3a; --error-bg: #fdf0f0; --success: #3a7b3a;
+  --shadow: rgba(0,0,0,0.04); --shadow-hover: rgba(0,0,0,0.07);
+  --header-bg: #f8f6f0;
+}
+[data-theme="dark"] {
+  --bg: #111115; --bg-card: #1a1a1f; --bg-input: #222228;
+  --text: #e0e0e0; --text-secondary: #999;
+  --border: #333340; --border-focus: #888;
+  --accent: #e0e0e0; --accent-hover: #bbb;
+  --error: #e06060; --error-bg: #2a1515; --success: #60b060;
+  --shadow: rgba(0,0,0,0.2); --shadow-hover: rgba(0,0,0,0.3);
+  --header-bg: #111115;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:"DengXian Light","DengXian","Microsoft YaHei Light","\u5fae\u8f6f\u96c5\u9ed1 Light","Noto Sans SC",sans-serif;
+  background:var(--bg); color:var(--text); line-height:1.7;
+  transition:background .3s,color .3s;
+}
+.app-header {
+  position:sticky;top:0;z-index:100;background:var(--bg);
+  border-bottom:1px solid var(--border);padding:0 40px;height:56px;
+  display:flex;align-items:center;justify-content:space-between;
+  transition:background .3s,border-color .3s;
+}
+.app-header .logo{font-size:16px;letter-spacing:1.5px;font-weight:300}
+.header-actions{display:flex;gap:12px;align-items:center}
+.header-actions button{
+  background:none;border:1px solid var(--border);width:36px;height:36px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--text);font-size:13px;letter-spacing:0;transition:border-color .2s
+}
+.header-actions button:hover{border-color:var(--text)}
+.header-actions button:active{transform:scale(0.93)}
+.header-actions button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.main-container{max-width:820px;margin:0 auto;padding:28px 40px 80px}
+.card{
+  background:var(--bg-card);border:1px solid var(--border);padding:28px;
+  margin-bottom:24px;box-shadow:0 1px 3px var(--shadow);transition:all .3s
+}
+.card:hover{box-shadow:0 2px 8px var(--shadow-hover)}
+.card-title{font-size:13px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:18px;font-weight:400;color:var(--text-secondary)}
+.section-title{font-size:22px;font-weight:500;letter-spacing:1px;margin-bottom:12px}
+.section-desc{font-size:14px;color:var(--text-secondary);margin-bottom:20px}
+.label{font-size:12px;letter-spacing:.5px;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:6px}
+.note{font-size:14px;color:var(--text-secondary)}
+code{
+  background:var(--bg-input);padding:2px 8px;font-size:14px;
+  border:1px solid var(--border);font-family:inherit
+}
+pre{
+  background:var(--bg-input);padding:16px 20px;border:1px solid var(--border);
+  font-size:14px;line-height:1.9;overflow-x:auto;margin:8px 0 16px;
+  font-family:inherit
+}
+pre .cmd{color:var(--accent);font-weight:500}
+table{width:100%;border-collapse:collapse;font-size:14px;margin:10px 0 16px}
+thead th{background:var(--table-stripe,var(--border));padding:9px 14px;font-weight:400;font-size:13px;letter-spacing:.5px;text-transform:uppercase;text-align:left;border:1px solid var(--table-border,var(--border))}
+tbody td{padding:8px 14px;border:1px solid var(--table-border,var(--border));font-variant-numeric:tabular-nums}
+tbody tr:nth-child(even) td{background:var(--table-stripe,var(--border))}
+kbd{
+  display:inline-block;padding:1px 8px;font-size:12px;font-family:inherit;
+  background:var(--bg-input);border:1px solid var(--border);
+  border-bottom-width:2px;border-radius:2px;margin:0 2px
+}
+.btn{
+  display:inline-block;background:none;border:1px solid var(--border);
+  padding:6px 16px;font-family:inherit;font-size:13px;color:var(--text);
+  cursor:pointer;letter-spacing:.5px;transition:all .2s;text-decoration:none
+}
+.btn:hover{border-color:var(--accent);background:var(--bg-input)}
+.btn-primary{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.btn-primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+.btn-row{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.example-block{
+  border-left:3px solid var(--accent);padding:12px 0 12px 18px;
+  margin:8px 0 16px;background:var(--bg-input)
+}
+.example-block .line{font-size:15px;padding:1px 0}
+.example-block .line.cmd-line{color:var(--text-secondary);font-size:13px;opacity:.7}
+.example-block .rendered-hint{margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);font-size:13px;color:var(--text-secondary)}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:var(--text-secondary)}
+*{scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+@media(max-width:720px){
+  .app-header{padding:0 16px}
+  .main-container{padding:20px 16px 60px}
+  .card{padding:20px}
+}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="logo" id="app-title">Monote · 帮助</div>
+  <div class="header-actions">
+    <button id="btn-lang" title="Switch language">EN</button>
+    <button class="theme-toggle" id="theme-toggle" title="Toggle theme">&#9681;</button>
+  </div>
+</header>
+
+<div class="main-container">
+
+  <div class="card" style="border-left:3px solid var(--accent)">
+    <div class="section-title" id="qs-title">快速上手</div>
+    <div class="section-desc" id="qs-desc">
+      Monote 是一款基于纯 HTML/CSS/JavaScript 的在线文本编辑工具。
+      编辑区输入文本，预览区实时渲染。支持斜杠命令和块标签实现快速排版。
+    </div>
+    <div class="btn-row">
+      <a class="btn btn-primary" id="back-link" href="">← 返回编辑器</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" id="sec1-title">一、行命令</div>
+    <p class="note" id="sec1-intro">在行首输入 <code>@命令</code> 后按空格，命令本身会在预览中隐藏，仅对后续文本生效。</p>
+
+    <table>
+      <thead><tr><th id="t-col-cmd">命令</th><th id="t-col-effect">效果</th><th id="t-col-example">示例</th></tr></thead>
+      <tbody>
+        <tr><td><code>@title</code></td><td class="eff-title">渲染为居中大号标题</td><td><code>@title 静夜思</code></td></tr>
+        <tr><td><code>@red</code></td><td class="eff-red">红色文字</td><td><code>@red 警告信息</code></td></tr>
+        <tr><td><code>@blue</code></td><td class="eff-blue">蓝色文字</td><td><code>@blue 链接文字</code></td></tr>
+        <tr><td><code>@green</code></td><td class="eff-green">绿色文字</td><td><code>@green 成功提示</code></td></tr>
+        <tr><td><code>@yellow</code></td><td class="eff-yellow">黄色文字</td><td><code>@yellow 注意</code></td></tr>
+        <tr><td><code>@purple</code></td><td class="eff-purple">紫色文字</td><td><code>@purple 强调</code></td></tr>
+        <tr><td><code>@orange</code></td><td class="eff-orange">橙色文字</td><td><code>@orange 提醒</code></td></tr>
+        <tr><td><code>@pink</code></td><td class="eff-pink">粉色文字</td><td><code>@pink 可爱</code></td></tr>
+        <tr><td><code>@cyan</code></td><td class="eff-cyan">青色文字</td><td><code>@cyan 技术说明</code></td></tr>
+        <tr><td><code>@0xNNNNNN</code></td><td class="eff-hex">自定义十六进制颜色</td><td><code>@0xFF5733 橙色</code></td></tr>
+        <tr><td><code>@center</code></td><td class="eff-center">行居中</td><td><code>@center 居中文字</code></td></tr>
+        <tr><td><code>@left</code></td><td class="eff-left">行居左</td><td><code>@left 居左文字</code></td></tr>
+        <tr><td><code>@right</code></td><td class="eff-right">行居右</td><td><code>@right 居右文字</code></td></tr>
+        <tr><td><code>@pxN</code></td><td class="eff-px">设置字号（N 为像素值）</td><td><code>@px24 大号字</code></td></tr>
+        <tr><td><code>@white</code></td><td class="eff-white">白色文字</td><td><code>@white 白色</code></td></tr>
+        <tr><td><code>@black</code></td><td class="eff-black">黑色文字</td><td><code>@black 黑色</code></td></tr>
+        <tr><td><code>@gray</code></td><td class="eff-gray">灰色文字</td><td><code>@gray 次要信息</code></td></tr>
+        <tr><td><code>@mhN</code></td><td class="eff-mh">左边距（N 可正可负，单位为 px）</td><td><code>@mh40 缩进</code></td></tr>
+        <tr><td><code>@mvN</code></td><td class="eff-mv">上边距（N 可正可负，单位为 px）</td><td><code>@mv20 段前距</code></td></tr>
+      </tbody>
+    </table>
+
+    <div class="label" id="sec1-chaining">命令可叠加</div>
+    <p class="note" id="sec1-chaining-desc">多个命令可以链式使用，按顺序依次生效：</p>
+    <pre><span class="cmd">@center @red @px20</span> 居中红色大号文字</pre>
+
+    <div class="label" id="sec1-title-label">关于 @title</div>
+    <p class="note" id="sec1-title-desc">
+      输入 <code>@title</code> 后跟空格，该行内容渲染为居中大号标题。
+      回车后下一行自动回到正文模式。
+    </p>
+  </div>
+
+  <div class="card">
+    <div class="card-title" id="sec2-title">二、块标签</div>
+    <p class="note" id="sec2-intro">
+      块标签将一组命令应用到多行文本上。用 <code>@@命令</code> 开头、<code>@@</code> 单独一行结束。
+    </p>
+
+    <table>
+      <thead><tr><th id="t-col-syntax">语法</th><th id="t-col-desc">说明</th></tr></thead>
+      <tbody>
+        <tr><td><code>@@命令</code></td><td class="block-start">开始块，后续行应用该命令</td></tr>
+        <tr><td><code>@@</code></td><td class="block-end">结束块，恢复正文模式</td></tr>
+      </tbody>
+    </table>
+
+    <div class="label" id="sec2-basic">基本用法</div>
+    <div class="example-block">
+      <div class="line cmd-line">@@center</div>
+      <div class="line">床前明月光，</div>
+      <div class="line">疑是地上霜。</div>
+      <div class="line">举头望明月，</div>
+      <div class="line">低头思故乡。</div>
+      <div class="line cmd-line">@@</div>
+      <div class="rendered-hint" id="sec2-hint1">↑ 块内所有行自动居中</div>
+    </div>
+
+    <div class="label" id="sec2-stacking">叠加属性</div>
+    <div class="example-block">
+      <div class="line cmd-line">@@center green</div>
+      <div class="line">床前明月光，</div>
+      <div class="line">疑是地上霜。</div>
+      <div class="line">举头望明月，</div>
+      <div class="line">低头思故乡。</div>
+      <div class="line cmd-line">@@</div>
+      <div class="rendered-hint" id="sec2-hint2">↑ 块内行居中、绿色</div>
+    </div>
+
+    <div class="label" id="sec2-full">完整示例</div>
+    <pre>
+<span class="cmd">@title</span> 静夜思
+<span class="cmd">@center</span> 【唐】李白
+
+<span class="cmd">@@center green</span>
+床前明月光，
+疑是地上霜。
+举头望明月，
+低头思故乡。
+<span class="cmd">@@</span>
+
+<span class="cmd">@right</span> — 静夜思 · 李白</pre>
+  </div>
+
+  <div class="card">
+    <div class="card-title" id="sec3-title">三、内标签</div>
+    <p class="note" id="sec3-intro">
+      使用 <code>@标签</code> 开始应用样式，使用裸 <code>@</code> 恢复上一层样式。样式可多层嵌套，后开的样式先恢复。
+    </p>
+
+    <table>
+      <thead><tr><th id="t3-col-syntax">语法</th><th id="t3-col-effect">效果</th></tr></thead>
+      <tbody>
+        <tr><td><code>@颜色名</code></td><td class="eff-inline-color">开始着色</td></tr>
+        <tr><td><code>@0xNNNNNN</code></td><td class="eff-inline-hex">开始自定义十六进制颜色</td></tr>
+        <tr><td><code>@pxN</code></td><td class="eff-inline-px">开始局部字号</td></tr>
+        <tr><td><code>@i</code></td><td class="eff-inline-i">开始斜体</td></tr>
+        <tr><td><code>@b</code></td><td class="eff-inline-b">开始加粗</td></tr>
+        <tr><td><code>@u</code></td><td class="eff-inline-u">开始下划线</td></tr>
+        <tr><td><code>@d</code></td><td class="eff-inline-d">开始删除线</td></tr>
+        <tr><td><code>@0</code></td><td class="eff-inline-reset">恢复默认颜色（脱离行/块颜色继承）</td></tr>
+        <tr><td><code>@</code>（裸）</td><td class="eff-inline-pop">出栈，恢复上一层样式</td></tr>
+        <tr><td><code>@@</code></td><td class="eff-inline-escape">转义，输出字面 @ 符号</td></tr>
+      </tbody>
+    </table>
+
+    <div class="label" id="sec3-basic">基本用法</div>
+    <pre>@purple 以下为 @red 重要条款 @ 请仔细阅读</pre>
+
+    <div class="label" id="sec3-chain">嵌套叠加</div>
+    <pre>普通文本 @red 红色 @b 红色加粗 @i 红色加粗斜体 @ 红色加粗 @ 红色 @ 普通文本</pre>
+
+    <div class="label" id="sec3-escape">转义 @@</div>
+    <pre>联系邮箱：support@@monote.app</pre>
+  </div>
+
+  <div class="card">
+    <div class="card-title" id="sec4-title">四、文件操作</div>
+    <table>
+      <thead><tr><th id="t-col-op">操作</th><th id="t-col-method">方式</th><th id="t-col-note">说明</th></tr></thead>
+      <tbody>
+        <tr><td class="op-save">保存</td><td>点击 <kbd>Save</kbd> 或按 <kbd>Ctrl</kbd>+<kbd>S</kbd></td><td class="save-desc">弹出系统保存对话框，可选保存位置和文件名</td></tr>
+        <tr><td class="op-open">打开</td><td>点击 <kbd>Open</kbd> 或按 <kbd>Ctrl</kbd>+<kbd>O</kbd></td><td class="open-desc">选择本地 .txt 文件打开</td></tr>
+        <tr><td class="op-drag">拖拽导入</td><td class="drag-method">将 .txt 文件拖入窗口</td><td class="drag-desc">拖入时显示拖放提示，释放即打开</td></tr>
+      </tbody>
+    </table>
+    <div class="note" style="margin-top:10px" id="sec4-note">
+      文件以 UTF-8 编码保存和读取，支持中文等 Unicode 字符。
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" id="sec5-title">五、快捷键</div>
+    <table>
+      <thead><tr><th id="t-col-key">快捷键</th><th id="t-col-func">功能</th></tr></thead>
+      <tbody>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td class="func-save">保存文件</td></tr>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>O</kbd></td><td class="func-open">打开文件</td></tr>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd></td><td class="func-undo">撤销（浏览器原生）</td></tr>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>Y</kbd> / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd></td><td class="func-redo">重做（浏览器原生）</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title" id="sec6-title">六、主题切换</div>
+    <p class="note" id="sec6-desc">
+      点击右上角的 <kbd>○</kbd> 按钮可在亮色主题与暗色主题之间切换。
+      亮色为暖灰米白色系，暗色为近黑蓝调，均遵循轻简设计风格。
+    </p>
+  </div>
+
+  <div class="card">
+    <div class="card-title" id="sec7-title">关于</div>
+    <p class="note" id="sec7-desc">
+      Monote — 完全使用 HTML、CSS、JavaScript<br>
+      设计风格参考「轻简 Web 页面设计风格」规范<br>
+      字体栈：DengXian · Microsoft YaHei · Noto Sans SC
+    </p>
+    <div class="btn-row">
+      <a class="btn btn-primary" id="back-link2" href="">← 返回编辑器</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  const LOCALE = {
+    zh: {
+      title: 'Monote · 帮助', btnLang: 'EN',
+      back: '← 返回编辑器',
+      qsTitle: '快速上手',
+      qsDesc: 'Monote 是一款基于纯 HTML/CSS/JavaScript 的在线文本编辑工具。编辑区输入文本，预览区实时渲染。支持 @命令、@@块标签 和 @内标签@ 实现快速排版。',
+      sec1Title: '一、行命令',
+      sec1Intro: '在行首输入 <code>@命令</code> 后按空格，命令本身会在预览中隐藏，仅对后续文本生效。',
+      effTitle: '渲染为居中大号标题', effRed: '红色文字', effBlue: '蓝色文字', effGreen: '绿色文字',
+      effYellow: '黄色文字', effPurple: '紫色文字', effOrange: '橙色文字',
+      effPink: '粉色文字', effCyan: '青色文字', effHex: '自定义十六进制颜色',
+      effWhite: '白色文字', effBlack: '黑色文字', effGray: '灰色文字',
+      effMh: '设置左边距（N 可正可负，单位 px）', effMv: '设置上边距（N 可正可负，单位 px）',
+      effCenter: '行居中', effLeft: '行居左', effRight: '行居右', effPx: '设置字号（N 为像素值）',
+      chaining: '命令可叠加', chainingDesc: '多个命令可以链式使用，按顺序依次生效：',
+      titleLabel: '关于 @title',
+      titleDesc: '输入 <code>@title</code> 后跟空格，该行内容渲染为居中大号标题。回车后下一行自动回到正文模式。',
+      sec2Title: '二、块标签',
+      sec2Intro: '块标签将一组命令应用到多行文本上。用 <code>@@命令</code> 开头、<code>@@</code> 单独一行结束。',
+      blockStart: '开始块，后续行应用该命令', blockEnd: '结束块，恢复正文模式',
+      sec2Basic: '基本用法', sec2Hint1: '↑ 块内所有行自动居中',
+      sec2Stacking: '叠加属性', sec2Hint2: '↑ 块内行居中、绿色',
+      sec2Full: '完整示例',
+      sec3Title: '三、内标签',
+      sec3Intro: '使用 <code>@标签</code> 开始应用样式，使用裸 <code>@</code> 恢复上一层样式。样式可多层嵌套，后开的样式先恢复。',
+      effInlineColor: '开始着色', effInlineHex: '开始自定义十六进制颜色',
+      effInlinePx: '开始局部字号', effInlineI: '开始斜体', effInlineB: '开始加粗',
+      effInlineU: '开始下划线', effInlineD: '开始删除线',
+      effInlineReset: '恢复默认颜色（脱离行/块颜色继承）',
+      effInlinePop: '出栈，恢复上一层样式',
+      effInlineEscape: '转义，输出字面 @ 符号',
+      sec3Basic: '基本用法', sec3Chain: '嵌套叠加', sec3Escape: '转义 @@',
+      sec4Title: '四、文件操作',
+      opSave: '保存', opOpen: '打开', opDrag: '拖拽导入',
+      saveDesc: '弹出系统保存对话框，可选保存位置和文件名',
+      openDesc: '选择本地 .txt 文件打开',
+      dragMethod: '将 .txt 文件拖入窗口', dragDesc: '拖入时显示拖放提示，释放即打开',
+      sec4Note: '文件以 UTF-8 编码保存和读取，支持中文等 Unicode 字符。',
+      sec5Title: '五、快捷键',
+      funcSave: '保存文件', funcOpen: '打开文件',
+      funcUndo: '撤销（浏览器原生）', funcRedo: '重做（浏览器原生）',
+      sec6Title: '六、主题切换',
+      sec6Desc: '点击右上角的 <kbd>○</kbd> 按钮可在亮色主题与暗色主题之间切换。亮色为暖灰米白色系，暗色为近黑蓝调，均遵循轻简设计风格。',
+      sec7Title: '关于',
+      sec7Desc: 'Monote — 完全使用 HTML、CSS、JavaScript\n设计风格参考「轻简 Web 页面设计风格」规范\n字体栈：DengXian · Microsoft YaHei · Noto Sans SC',
+    },
+    en: {
+      title: 'Monote · Help', btnLang: '中',
+      back: '← Back to Editor',
+      qsTitle: 'Quick Start',
+      qsDesc: 'Monote is a pure HTML/CSS/JavaScript online text editor. Type in the editor and see real-time preview. Use @commands, @@block tags, and @inline tags@ for quick formatting.',
+      sec1Title: '1. Line Commands',
+      sec1Intro: 'Type <code>@command</code> at line start followed by a space. The command stays hidden in preview, only the following text is shown.',
+      effTitle: 'Centered large heading', effRed: 'Red text', effBlue: 'Blue text', effGreen: 'Green text',
+      effYellow: 'Yellow text', effPurple: 'Purple text', effOrange: 'Orange text',
+      effPink: 'Pink text', effCyan: 'Cyan text', effHex: 'Custom hex color',
+      effWhite: 'White text', effBlack: 'Black text', effGray: 'Gray text',
+      effMh: 'Left margin (N in px, negative allowed)', effMv: 'Top margin (N in px, negative allowed)',
+      effCenter: 'Center align', effLeft: 'Left align', effRight: 'Right align', effPx: 'Set font size (N in px)',
+      chaining: 'Chaining Commands', chainingDesc: 'Multiple commands can be chained together:',
+      titleLabel: 'About @title',
+      titleDesc: 'Type <code>@title</code> followed by a space to render a centered heading. Next line returns to normal.',
+      sec2Title: '2. Block Tags',
+      sec2Intro: 'Apply commands to multiple lines. Start with <code>@@command</code>, end with <code>@@</code> on its own line.',
+      blockStart: 'Start block — lines apply the command', blockEnd: 'End block — back to normal',
+      sec2Basic: 'Basic Usage', sec2Hint1: '↑ All lines inside block are centered',
+      sec2Stacking: 'Stacking Properties', sec2Hint2: '↑ Lines centered, green',
+      sec2Full: 'Full Example',
+      sec3Title: '3. Inline Tags',
+      sec3Intro: 'Use <code>@tag</code> to start a style, bare <code>@</code> to pop back to the previous style. Styles can be nested.',
+      effInlineColor: 'Start coloring', effInlineHex: 'Start custom hex color',
+      effInlinePx: 'Start local font size', effInlineI: 'Start italic', effInlineB: 'Start bold',
+      effInlineU: 'Start underline', effInlineD: 'Start strikethrough',
+      effInlineReset: 'Reset to default (uninherits line/block color)',
+      effInlinePop: 'Pop — restore previous style',
+      effInlineEscape: 'Escape — output literal @',
+      sec3Basic: 'Basic Usage', sec3Chain: 'Chaining', sec3Escape: 'Escape @@',
+      sec4Title: '4. File Operations',
+      opSave: 'Save', opOpen: 'Open', opDrag: 'Drag & Drop',
+      saveDesc: 'System save dialog — choose location and name',
+      openDesc: 'Select a local .txt file',
+      dragMethod: 'Drag a .txt file into the window', dragDesc: 'Shows drop indicator, release to open',
+      sec4Note: 'Files use UTF-8 encoding, supporting Chinese and all Unicode characters.',
+      sec5Title: '5. Shortcuts',
+      funcSave: 'Save file', funcOpen: 'Open file',
+      funcUndo: 'Undo (browser native)', funcRedo: 'Redo (browser native)',
+      sec6Title: '6. Theme Toggle',
+      sec6Desc: 'Click the <kbd>○</kbd> button in top-right to switch between light and dark themes.',
+      sec7Title: '7. About',
+      sec7Desc: 'Monote — Built with pure HTML, CSS, JavaScript\nDesign follows "Light Web Design Style" guide\nFont stack: DengXian · Microsoft YaHei · Noto Sans SC',
+    }
+  };
+
+  let lang = 'zh';
+
+  function t(key) {
+    return (LOCALE[lang] && LOCALE[lang][key]) || (LOCALE.zh[key]) || key;
+  }
+
+  function loadConfig() {
+    try {
+      const raw = localStorage.getItem('lite-editor-config');
+      if (raw) return JSON.parse(raw);
+    } catch (_) {}
+    return {};
+  }
+  function saveConfig(obj) {
+    try {
+      const cur = loadConfig();
+      for (const k in obj) cur[k] = obj[k];
+      localStorage.setItem('lite-editor-config', JSON.stringify(cur));
+    } catch (_) {}
+  }
+
+  // ── Theme ──
+  function applyTheme(t) { document.documentElement.setAttribute('data-theme', t); }
+  function setURLTheme(t) {
+    const u = new URL(window.location);
+    u.searchParams.set('theme', t);
+    window.history.replaceState(null, '', u);
+  }
+  const urlTheme = new URLSearchParams(window.location.search).get('theme');
+  const cfg = loadConfig();
+  applyTheme((urlTheme === 'light' || urlTheme === 'dark') ? urlTheme : (cfg.theme || 'dark'));
+  setURLTheme(document.documentElement.getAttribute('data-theme'));
+
+  document.getElementById('theme-toggle').addEventListener('click', function(){
+    const r = document.documentElement;
+    const t = r.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    r.setAttribute('data-theme', t);
+    setURLTheme(t);
+    saveConfig({ theme: t });
+    updateBackLinks();
+  });
+
+  // ── Language ──
+  const urlLang = new URLSearchParams(window.location.search).get('lang');
+  lang = (urlLang === 'en' || urlLang === 'zh') ? urlLang : (cfg.lang || 'zh');
+
+  function applyLang() {
+    document.documentElement.setAttribute('lang', lang === 'en' ? 'en' : 'zh-CN');
+    document.title = t('title');
+    document.getElementById('app-title').textContent = t('title');
+    document.getElementById('btn-lang').textContent = t('btnLang');
+    document.getElementById('back-link').textContent = t('back');
+    document.getElementById('back-link2').textContent = t('back');
+
+    // Quick start
+    document.getElementById('qs-title').textContent = t('qsTitle');
+    document.getElementById('qs-desc').textContent = t('qsDesc');
+
+    // Section 1
+    document.getElementById('sec1-title').textContent = t('sec1Title');
+    document.getElementById('sec1-intro').innerHTML = t('sec1Intro');
+    for (const cls of ['title','red','blue','green','yellow','purple','orange','pink','cyan','hex','white','black','gray','mh','mv','center','left','right','px']) {
+      const el = document.querySelector('.eff-' + cls);
+      if (el) el.textContent = t('eff' + cls.charAt(0).toUpperCase() + cls.slice(1));
+    }
+    document.getElementById('sec1-chaining').textContent = t('chaining');
+    document.getElementById('sec1-chaining-desc').textContent = t('chainingDesc');
+    document.getElementById('sec1-title-label').textContent = t('titleLabel');
+    document.getElementById('sec1-title-desc').innerHTML = t('titleDesc');
+
+    // Section 2
+    document.getElementById('sec2-title').textContent = t('sec2Title');
+    document.getElementById('sec2-intro').innerHTML = t('sec2Intro');
+    document.querySelector('.block-start').textContent = t('blockStart');
+    document.querySelector('.block-end').textContent = t('blockEnd');
+    document.getElementById('sec2-basic').textContent = t('sec2Basic');
+    document.getElementById('sec2-hint1').textContent = t('sec2Hint1');
+    document.getElementById('sec2-stacking').textContent = t('sec2Stacking');
+    document.getElementById('sec2-hint2').textContent = t('sec2Hint2');
+    document.getElementById('sec2-full').textContent = t('sec2Full');
+
+    // Section 3 (inline tags)
+    document.getElementById('sec3-title').textContent = t('sec3Title');
+    document.getElementById('sec3-intro').innerHTML = t('sec3Intro');
+    for (const cls of ['color','hex','px','i','b','u','d','reset','pop','escape']) {
+      const el = document.querySelector('.eff-inline-' + cls);
+      if (el) el.textContent = t('effInline' + cls.charAt(0).toUpperCase() + cls.slice(1));
+    }
+    document.getElementById('sec3-basic').textContent = t('sec3Basic');
+    document.getElementById('sec3-chain').textContent = t('sec3Chain');
+    document.getElementById('sec3-escape').textContent = t('sec3Escape');
+
+    // Section 4 (file operations)
+    document.getElementById('sec4-title').textContent = t('sec4Title');
+    for (const cls of ['save','open','drag']) {
+      const el = document.querySelector('.' + cls + '-desc');
+      if (el) el.textContent = t(cls + 'Desc');
+    }
+    for (const cls of ['save','open','drag']) {
+      const el = document.querySelector('.op-' + cls);
+      if (el) el.textContent = t('op' + cls.charAt(0).toUpperCase() + cls.slice(1));
+    }
+    document.querySelector('.drag-method').textContent = t('dragMethod');
+    document.getElementById('sec4-note').textContent = t('sec4Note');
+
+    // Section 5
+    document.getElementById('sec5-title').textContent = t('sec5Title');
+    for (const fn of ['save','open','undo','redo']) {
+      const el = document.querySelector('.func-' + fn);
+      if (el) el.textContent = t('func' + fn.charAt(0).toUpperCase() + fn.slice(1));
+    }
+
+    // Section 6-7
+    document.getElementById('sec6-title').textContent = t('sec6Title');
+    document.getElementById('sec6-desc').innerHTML = t('sec6Desc');
+    document.getElementById('sec7-title').textContent = t('sec7Title');
+    document.getElementById('sec7-desc').innerHTML = t('sec7Desc').replace(/\n/g, '<br>');
+
+    updateBackLinks();
+  }
+
+  document.getElementById('btn-lang').addEventListener('click', function(){
+    lang = (lang === 'zh') ? 'en' : 'zh';
+    applyLang();
+    saveConfig({ lang: lang });
+  });
+
+  function updateBackLinks() {
+    const t = document.documentElement.getAttribute('data-theme') || 'dark';
+    const href = 'main.html?theme=' + t + '&lang=' + lang;
+    document.getElementById('back-link').href = href;
+    document.getElementById('back-link2').href = href;
+    // Also update the theme toggle title
+    document.getElementById('theme-toggle').title = t === 'dark' ? 'Switch to light' : 'Switch to dark';
+  }
+
+  applyLang();
+})();
+</script>
+</body>
+</html>
