@@ -1,0 +1,56 @@
+Monote 第三方技术声明
+======================
+
+Monote 是一款纯前端在线文本编辑器，后端基于 Node.js 内置模块
+（http、fs、path），无任何外部 npm 依赖。
+
+本软件在构建和运行过程中使用了以下第三方技术：
+
+
+1. Node.js
+-----------
+Monote 的服务端基于 Node.js 运行时开发。
+Node.js 是 JavaScript 运行时环境，采用 Node.js Foundation 的
+多数贡献者版权许可（见第三方许可文件）。
+Node.js 是 OpenJS Foundation 的注册商标。
+官网：https://nodejs.org/
+
+Node.js 内置模块使用：
+  - http       HTTP 服务器
+  - fs         文件读写
+  - path       路径处理
+  - child_process  启动浏览器（可选）
+
+Monote 不在此之外引入任何 Node.js 第三方包。
+
+
+2. pkg
+-------
+Monote 的 Windows 可执行文件（.exe）由 pkg 工具生成。
+pkg 将 Node.js 应用及其运行时打包为独立可执行文件，
+使用户无需预先安装 Node.js 即可运行 Monote。
+pkg 采用 MIT License 许可发布。
+官网：https://github.com/vercel/pkg
+
+
+3. 浏览器 Web API
+------------------
+Monote 前端使用浏览器原生 Web API，
+包括但不限于：
+  - File System Access API（文件读写）
+  - FileReader API（拖拽打开）
+  - localStorage（配置持久化）
+
+以上 API 均为 W3C/WHATWG 标准，由各浏览器厂商实现。
+
+
+4. 字体
+--------
+Monote 的 CSS 字体栈：
+  DengXian、Microsoft YaHei、Noto Sans SC
+分别由 微软 和 Google 提供。
+
+
+
+Momster Tech
+2026-06
