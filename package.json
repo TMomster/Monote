@@ -1,0 +1,19 @@
+{
+  "name": "Monote",
+  "version": "1.0.0",
+  "description": "Monote — 本地服务器",
+  "license": "MIT",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "build:exe": "pkg server.js --targets node18-win-x64 --output runpack/Monote.exe"
+  },
+  "pkg": {
+    "assets": [
+      "runpack/resources/*",
+      "runpack/config.json",
+      "doc/**/*"
+    ],
+    "targets": ["node18-win-x64"]
+  }
+}
