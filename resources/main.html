@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monote</title>
+<style>
+::root {
+  --bg: #f8f6f0; --bg-card: #ffffff; --bg-input: #f3f1eb;
+  --text: #2c2c2c; --text-secondary: #6b6b6b;
+  --border: #d0cec6; --border-focus: #2c2c2c;
+  --accent: #2c2c2c; --accent-hover: #555;
+  --error: #b33a3a; --error-bg: #fdf0f0; --success: #3a7b3a;
+  --shadow: rgba(0,0,0,0.04); --shadow-hover: rgba(0,0,0,0.07);
+  --header-bg: #f8f6f0;
+}
+[data-theme="dark"] {
+  --bg: #111115; --bg-card: #1a1a1f; --bg-input: #222228;
+  --text: #e0e0e0; --text-secondary: #999;
+  --border: #333340; --border-focus: #888;
+  --accent: #e0e0e0; --accent-hover: #bbb;
+  --error: #e06060; --error-bg: #2a1515; --success: #60b060;
+  --shadow: rgba(0,0,0,0.2); --shadow-hover: rgba(0,0,0,0.3);
+  --header-bg: #111115;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:"DengXian Light","DengXian","Microsoft YaHei Light","\u5fae\u8f6f\u96c5\u9ed1 Light","Noto Sans SC",sans-serif;
+  background:var(--bg); color:var(--text); line-height:1.7;
+  transition:background .3s,color .3s;
+  height:100vh; overflow:hidden;
+  display:flex; flex-direction:column;
+}
+.app-header {
+  flex-shrink:0;
+  border-bottom:1px solid var(--border);padding:0 28px;height:52px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--bg); transition:background .3s,border-color .3s;
+  gap:12px;
+}
+.app-header .logo{font-size:16px;letter-spacing:1.5px;font-weight:300;white-space:nowrap}
+.header-actions{display:flex;gap:8px;align-items:center;flex-shrink:0}
+.header-actions button{
+  background:none;border:1px solid var(--border);height:34px;padding:0 14px;
+  font-family:inherit;font-size:13px;color:var(--text);cursor:pointer;
+  letter-spacing:.5px;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.header-actions button:hover{background:var(--bg-input);border-color:var(--text)}
+.header-actions button:active{transform:scale(0.93)}
+.header-actions button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.drop-overlay{
+  display:none; position:fixed; inset:0; z-index:999;
+  background:var(--bg); opacity:0; transition:opacity .2s;
+  align-items:center; justify-content:center; pointer-events:none;
+}
+.drop-overlay.show{display:flex; opacity:.92; pointer-events:auto}
+.drop-zone-box{
+  border:2px dashed var(--accent); padding:48px 64px;
+  text-align:center; background:var(--bg-card);
+}
+.drop-zone-box .drop-icon{font-size:32px;margin-bottom:10px;letter-spacing:1px;opacity:.5}
+.drop-zone-box .label{font-size:14px;letter-spacing:.5px;color:var(--text-secondary)}
+.main-container{flex:1;display:flex;overflow:hidden;padding:0}
+.pane{
+  flex:1; display:flex; flex-direction:column; overflow:hidden;
+  position:relative;
+}
+.pane:first-child{border-right:1px solid var(--border)}
+/* Layout modes */
+.layout-editor #preview-pane{display:none}
+.layout-preview #editor-pane{display:none}
+.layout-split #editor-pane,.layout-split #preview-pane{display:flex}
+.pane-header{
+  flex-shrink:0; display:flex; align-items:center; justify-content:space-between;
+  padding:10px 20px; border-bottom:1px solid var(--border);
+  font-size:12px; letter-spacing:1px; text-transform:uppercase;
+  color:var(--text-secondary); background:var(--bg);
+}
+.pane-body{flex:1;overflow:hidden;padding:0;position:relative}
+#preview-pane .pane-body{overflow:auto}
+.editor-textarea{
+  width:100%; height:100%; border:none; outline:none; resize:none;
+  font-family:inherit; font-size:15px; line-height:1.8;
+  background:var(--bg); color:var(--text);
+  padding:24px; transition:background .3s,color .3s;
+}
+.editor-textarea::-webkit-scrollbar{width:8px;height:8px}
+.editor-textarea::-webkit-scrollbar-track{background:var(--bg)}
+.editor-textarea::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.editor-textarea::-webkit-scrollbar-thumb:hover{background:var(--text-secondary)}
+.preview-body{padding:24px;min-height:100%;font-size:15px;line-height:1.8;word-break:break-word}
+.preview-body .preview-title{
+  text-align:center; font-size:26px; font-weight:500; letter-spacing:1.5px;
+  margin:0 0 8px 0; padding:12px 0;
+}
+.preview-body .preview-line{margin:0; padding:1px 0; min-height:1.5em; transition:all .15s;white-space:pre-wrap;word-break:break-word}
+.preview-body .preview-line.empty-line{height:1.2em}
+.status-bar{
+  flex-shrink:0; display:flex; align-items:center; justify-content:space-between;
+  padding:4px 20px; border-top:1px solid var(--border);
+  font-size:12px; color:var(--text-secondary); letter-spacing:.3px;
+  background:var(--bg); transition:background .3s;
+}
+.pane-body::-webkit-scrollbar{width:8px;height:8px}
+.pane-body::-webkit-scrollbar-track{background:transparent}
+.pane-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.pane-body::-webkit-scrollbar-thumb:hover{background:var(--text-secondary)}
+.dragover-active .editor-textarea,
+.dragover-active .pane-body{border:2px dashed var(--accent);opacity:.6}
+.toast{
+  position:fixed; bottom:28px; left:50%; transform:translateX(-50%);
+  background:var(--accent); color:var(--bg);
+  padding:8px 22px; font-size:13px; letter-spacing:.5px;
+  opacity:0; transition:opacity .3s; pointer-events:none; z-index:1000;
+}
+.toast.show{opacity:1}
+@media(max-width:720px){
+  .main-container{flex-direction:column}
+  .pane:first-child{border-right:none;border-bottom:1px solid var(--border)}
+  .pane{flex:0 0 50vh}
+  .app-header{padding:0 16px}
+  .app-header .logo{font-size:14px;letter-spacing:1px}
+  .header-actions button{padding:0 10px;font-size:12px}
+  .editor-textarea{padding:16px}
+  .preview-body{padding:16px}
+  .layout-editor #editor-pane,
+  .layout-preview #preview-pane{flex:1}
+}
+@media(max-width:480px){
+  .app-header .logo{display:none}
+  .pane{flex:0 0 45vh}
+}
+
+/* Splash screen */
+#splash{
+  position:fixed; inset:0; z-index:9999;
+  display:none; flex-direction:column;
+  align-items:center; justify-content:center;
+  background:#000;
+}
+#splash-title{
+  font-size:56px; letter-spacing:6px; font-weight:300;
+  color:#fff; line-height:1.2;
+}
+#splash-title span{
+  display:inline-block;
+  will-change:transform,opacity;
+}
+.splash-char{
+  animation:splashCharIn .5s cubic-bezier(.16,1,.3,1) both;
+  animation-delay:0s;
+}
+@keyframes splashCharIn{
+  0%{opacity:0;transform:translateY(18px)}
+  100%{opacity:1;transform:translateY(0)}
+}
+#splash-subtitle{
+  font-size:13px; letter-spacing:3px; color:#fff;
+  opacity:0; margin-top:16px;
+  transition:opacity .6s linear;
+}
+
+/* ── Print preview ── */
+#print-overlay{
+  position:fixed; inset:0; z-index:9998;
+  display:none; flex-direction:column;
+  background:var(--bg); color:var(--text);
+}
+#print-toolbar{
+  flex-shrink:0; display:flex; align-items:center; gap:6px;
+  padding:5px 14px; border-bottom:1px solid var(--border);
+  background:var(--bg); font-size:12px; flex-wrap:wrap;
+}
+#print-toolbar label{color:var(--text-secondary);letter-spacing:.3px;white-space:nowrap}
+#print-toolbar select{
+  background:var(--bg-input); color:var(--text);
+  border:1px solid var(--border); padding:3px 5px; font-size:12px;
+  font-family:inherit; outline:none; cursor:pointer;
+}
+#print-toolbar select:hover{border-color:var(--text)}
+#print-toolbar button{
+  background:none; border:1px solid var(--border); height:28px; padding:0 10px;
+  font-family:inherit; font-size:12px; color:var(--text); cursor:pointer;
+  letter-spacing:.5px; display:flex;align-items:center;gap:4px;
+}
+#print-toolbar button:hover{background:var(--bg-input);border-color:var(--text)}
+#print-toolbar .print-spacer{flex:1}
+#print-toolbar .print-toggle-settings{
+  font-size:14px;padding:0 6px;border:none;background:none;
+  color:var(--text-secondary);cursor:pointer;
+}
+#print-toolbar .print-toggle-settings:hover{color:var(--text)}
+#print-settings{
+  flex-shrink:0; display:none; flex-wrap:wrap; gap:8px 16px;
+  padding:8px 14px; border-bottom:1px solid var(--border);
+  background:var(--bg); font-size:12px;
+}
+#print-settings.open{display:flex}
+.print-settings-group{
+  display:flex; align-items:center; gap:3px 6px; flex-wrap:wrap;
+}
+.print-settings-group .label{
+  color:var(--text-secondary);letter-spacing:.3px;white-space:nowrap;
+}
+.print-settings-group select,.print-settings-group input{
+  background:var(--bg-input); color:var(--text);
+  border:1px solid var(--border); padding:2px 4px; font-size:12px;
+  font-family:inherit; outline:none;
+}
+.print-settings-group select:hover,.print-settings-group input:hover{border-color:var(--text)}
+.print-settings-group input[type=number]{width:44px;}
+.print-settings-group input[type=color]{width:26px;height:20px;padding:0;cursor:pointer;background:none;border:1px solid var(--border);}
+.print-settings-group .unit{color:var(--text-secondary);font-size:10px;}
+#print-pages{
+  flex:1; overflow:auto; display:flex; flex-direction:column;
+  align-items:center; gap:16px; padding:24px 16px; background:#e8e8e8;
+}
+#print-pages.continuous{
+  background:var(--bg); gap:0; padding:0;
+}
+#print-pages.continuous .print-page{
+  box-shadow:0 2px 12px rgba(0,0,0,.15); margin:24px 16px;
+}
+.print-page{
+  background:var(--print-bg,#fff); color:var(--print-fg,#222);
+  box-shadow:0 2px 12px rgba(0,0,0,.15);
+  font-size:14px; line-height:var(--print-line-height,1.8);
+  letter-spacing:var(--print-letter-spacing,0);
+  word-break:break-word; position:relative;
+  width:var(--page-w,680px);
+  padding:var(--print-mt,20px) var(--print-mr,24px) var(--print-mb,20px) var(--print-ml,24px);
+}
+.print-page .print-watermark{
+  position:absolute; top:0; left:0; right:0; bottom:0;
+  pointer-events:none; overflow:hidden; display:flex;
+  flex-wrap:wrap; align-content:center; justify-content:center;
+  z-index:1;
+}
+.print-page .print-watermark span{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:calc(100% / var(--wm-cols,3)); height:calc(100% / var(--wm-rows,3));
+  font-size:28px; font-weight:bold; color:var(--print-fg,#222);
+  opacity:calc(var(--wm-opacity,10) / 100);
+  white-space:nowrap; transform:rotate(-25deg); user-select:none;
+  box-sizing:border-box;
+}
+/* Paginated mode: fixed page height with flex so header/body stay inside the paper */
+#print-pages:not(.continuous) .print-page {
+  height: var(--page-h, 960px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+#print-pages:not(.continuous) .print-page .preview-body {
+  flex: 1;
+  min-height: 0;
+}
+.print-page .preview-title{
+  text-align:center; font-size:24px; font-weight:500; letter-spacing:1.5px;
+  margin:0 0 8px 0; padding:12px 0;
+}
+.print-page .preview-line{margin:0; padding:1px 0; min-height:1.5em;white-space:pre-wrap;word-break:break-word}
+.print-page .preview-line.empty-line{height:1.2em}
+@media print{
+  body>*:not(#print-overlay){display:none!important}
+  #print-overlay{position:static;display:flex!important;background:var(--print-bg,#fff);color:var(--print-fg,#222)}
+  #print-toolbar,#print-settings{display:none!important}
+  #print-pages{padding:0;background:none;overflow:visible;gap:0}
+  #print-pages.continuous .print-page,
+  .print-page{height:auto!important;overflow:visible!important;box-shadow:none;width:100%;max-width:none;margin:0;page-break-after:always}
+  .print-page:last-child{page-break-after:auto}
+}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+<div id="splash">
+  <div id="splash-title"></div>
+  <div id="splash-subtitle">Momster Tech</div>
+</div>
+
+<header class="app-header">
+  <div class="logo" id="app-title">Monote</div>
+  <div class="header-actions">
+    <button id="btn-open" title="Open (Ctrl+O)" aria-label="Open file"><span id="btn-open-text">打开</span></button>
+    <button id="btn-save" title="Save (Ctrl+S)" aria-label="Save file"><span id="btn-save-text">保存</span></button>
+    <button id="btn-print" title="Print Preview" aria-label="Print preview" style="font-size:13px;letter-spacing:.5px"><span id="btn-print-text">打印</span></button>
+    <button id="btn-help" title="Help" aria-label="Help"><span id="btn-help-text">帮助</span></button>
+    <button id="btn-lang" title="Switch language" aria-label="Switch language" style="letter-spacing:0">EN</button>
+    <button id="btn-layout" title="Toggle layout" aria-label="Toggle layout" style="font-size:12px;padding:0 10px;letter-spacing:0">E+P</button>
+    <button id="theme-toggle" title="Toggle theme" aria-label="Toggle theme" style="font-size:16px;padding:0 12px">&#9681;</button>
+  </div>
+</header>
+
+<div class="main-container">
+  <div class="pane" id="editor-pane">
+    <div class="pane-header">
+      <span id="pane-editor-label">编辑区</span>
+      <span id="pane-editor-hint" style="font-size:10px;opacity:.6">支持 @命令 · @@块标签</span>
+    </div>
+    <div class="pane-body">
+      <textarea class="editor-textarea" id="editor"></textarea>
+    </div>
+  </div>
+  <div class="pane" id="preview-pane">
+    <div class="pane-header">
+      <span id="pane-preview-label">预览区</span>
+      <span class="char-count" id="char-count" style="font-size:10px;opacity:.6">0 chars</span>
+    </div>
+    <div class="pane-body">
+      <div class="preview-body" id="preview"></div>
+    </div>
+  </div>
+</div>
+
+<div class="status-bar">
+  <span id="line-count">0 lines</span>
+  <span id="status-hint">...</span>
+</div>
+
+<div class="drop-overlay" id="drop-overlay">
+  <div class="drop-zone-box">
+    <div class="drop-icon">[ TXT ]</div>
+    <div class="label" id="drop-label">释放以打开文件</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div id="print-overlay">
+  <div class="print-toolbar" id="print-toolbar">
+    <select id="print-orientation">
+      <option value="portrait" id="print-opt-portrait">竖版</option>
+      <option value="landscape" id="print-opt-landscape">横版</option>
+    </select>
+    <button id="btn-print-toggle-settings" class="print-toggle-settings" title="版式设置">&#9881;</button>
+    <span class="print-spacer"></span>
+    <button id="btn-print-exec">&#128424; <span id="btn-print-exec-text">打印</span></button>
+    <button id="btn-print-close">&#10005; <span id="btn-print-close-text">关闭</span></button>
+  </div>
+  <div id="print-settings">
+    <div class="print-settings-group" id="ps-margins">
+      <span class="label" id="ps-label-margins">页边距</span>
+      <span class="label" id="ps-label-mt">上</span><input type="number" id="ps-mt" value="20" min="0" max="100"><span class="unit">px</span>
+      <span class="label" id="ps-label-mb">下</span><input type="number" id="ps-mb" value="20" min="0" max="100"><span class="unit">px</span>
+      <span class="label" id="ps-label-ml">左</span><input type="number" id="ps-ml" value="24" min="0" max="100"><span class="unit">px</span>
+      <span class="label" id="ps-label-mr">右</span><input type="number" id="ps-mr" value="24" min="0" max="100"><span class="unit">px</span>
+    </div>
+    <div class="print-settings-group" id="ps-typography">
+      <span class="label" id="ps-label-typo">排版</span>
+      <span class="label" id="ps-label-ls">行距</span>
+      <select id="ps-line-spacing">
+        <option value="1.0">1.0</option>
+        <option value="1.2">1.2</option>
+        <option value="1.5">1.5</option>
+        <option value="1.8" selected>1.8</option>
+        <option value="2.0">2.0</option>
+        <option value="2.5">2.5</option>
+      </select>
+      <span class="label" id="ps-label-cs">字间距</span>
+      <select id="ps-letter-spacing">
+        <option value="0">正常</option>
+        <option value="0.5">0.5px</option>
+        <option value="1">1px</option>
+        <option value="2">2px</option>
+      </select>
+    </div>
+    <div class="print-settings-group" id="ps-colors">
+      <span class="label" id="ps-label-colors">颜色</span>
+      <span class="label" id="ps-label-bg">背景</span><input type="color" id="ps-bg" value="#ffffff">
+      <span class="label" id="ps-label-fg">前景</span><input type="color" id="ps-fg" value="#222222">
+    </div>
+    <div class="print-settings-group" id="ps-watermark">
+      <span class="label" id="ps-label-watermark">水印</span>
+      <span class="label" id="ps-label-wm-text">内容</span><input type="text" id="ps-wm-text" placeholder="Monote" style="width:72px">
+      <span class="label" id="ps-label-wm-rows">行</span><input type="number" id="ps-wm-rows" value="3" min="0" max="20" style="width:40px">
+      <span class="label" id="ps-label-wm-cols">列</span><input type="number" id="ps-wm-cols" value="3" min="0" max="20" style="width:40px">
+      <span class="label" id="ps-label-wm-opacity">透明度</span>
+      <input type="range" id="ps-wm-opacity" min="0" max="30" value="10" style="width:72px;vertical-align:middle;cursor:pointer">
+      <span id="ps-wm-opacity-value" style="font-size:11px;color:var(--text-secondary);min-width:28px;display:inline-block;text-align:right">10%</span>
+    </div>
+  </div>
+  <div class="print-pages" id="print-pages"></div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  // ── Splash ──
+  function showSplash(callback) {
+    const splash = document.getElementById('splash');
+    const titleEl = document.getElementById('splash-title');
+    const subtitleEl = document.getElementById('splash-subtitle');
+
+    splash.style.display = 'flex';
+
+    // Build character spans with smooth slide-up animation
+    const title = 'Monote';
+    const charInterval = 120;
+    titleEl.innerHTML = '';
+    title.split('').forEach(function(char, i) {
+      const span = document.createElement('span');
+      span.textContent = char;
+      span.className = 'splash-char';
+      span.style.animationDelay = (i * charInterval) + 'ms';
+      titleEl.appendChild(span);
+    });
+
+    // Subtitle: gradient from transparent to opaque over 600ms (syncs with last char)
+    requestAnimationFrame(function() {
+      subtitleEl.style.opacity = '1';
+    });
+
+    // Fade-out sequence: content first, then splash bg
+    const displayTime = 1000;
+    setTimeout(function() {
+      // Phase 1: fade out text content (200ms)
+      titleEl.style.transition = 'opacity .2s ease';
+      titleEl.style.opacity = '0';
+      subtitleEl.style.transition = 'opacity .2s ease';
+      subtitleEl.style.opacity = '0';
+      // Phase 2: fade out black background (300ms)
+      setTimeout(function() {
+        splash.style.transition = 'opacity .3s ease';
+        splash.style.opacity = '0';
+        setTimeout(function() {
+          splash.remove();
+          if (callback) callback();
+        }, 300);
+      }, 200);
+    }, displayTime);
+  }
+
+  // ── Locale ──
+  const LOCALE = {
+    zh: {
+      title: 'Monote',
+      editor: '编辑区',
+      preview: '预览区',
+      editorHint: '支持 @命令 · @@块标签 · @内标签@',
+      open: '打开',
+      save: '保存',
+      help: '帮助',
+      theme: '主题',
+      statusHint: '拖拽文件即可打开 · 支持 .txt 格式',
+      dropLabel: '释放以打开文件',
+      lineFmt: '{n} 行',
+      charFmt: '{n} 字符',
+      saved: '文件已保存',
+      savedTo: '已保存到: ',
+      downloaded: '文件已下载',
+      opened: '文件已打开: ',
+      readError: '读取文件失败',
+      saveError: '保存失败: ',
+      txtOnly: '仅支持 .txt 文本文件',
+      print: '打印',
+      printClose: '关闭',
+      printPortrait: '竖版',
+      printLandscape: '横版',
+      printSettings: '版式设置',
+      printMargins: '页边距',
+      printTop: '上',
+      printBottom: '下',
+      printLeft: '左',
+      printRight: '右',
+      printTypography: '排版',
+      printLineSpace: '行距',
+      printCharSpace: '字间距',
+      printCharSpaceNormal: '正常',
+      printColors: '颜色',
+      printBg: '背景',
+      printFg: '前景',
+      printLoad: '打印预览已就绪',
+      printWatermark: '水印',
+      printWMText: '内容',
+      printWMRows: '行',
+      printWMCols: '列',
+      printWMOpacity: '透明度',
+      printBtn: '打印',
+      btnLang: 'EN',
+    },
+    en: {
+      title: 'Monote',
+      editor: 'Editor',
+      preview: 'Preview',
+      editorHint: 'Supports @commands · @@block tags · @inline tags@',
+      open: 'Open',
+      save: 'Save',
+      help: 'Help',
+      theme: 'Theme',
+      statusHint: 'Drag & drop .txt files to open',
+      dropLabel: 'Release to open file',
+      lineFmt: '{n} lines',
+      charFmt: '{n} chars',
+      saved: 'File saved',
+      savedTo: 'Saved to: ',
+      downloaded: 'File downloaded',
+      opened: 'Opened: ',
+      readError: 'Failed to read file',
+      saveError: 'Save failed: ',
+      txtOnly: 'Only .txt files are supported',
+      print: 'Print',
+      printClose: 'Close',
+      printPortrait: 'Portrait',
+      printLandscape: 'Landscape',
+      printSettings: 'Layout',
+      printMargins: 'Margins',
+      printTop: 'Top',
+      printBottom: 'Bottom',
+      printLeft: 'Left',
+      printRight: 'Right',
+      printTypography: 'Typography',
+      printLineSpace: 'Line',
+      printCharSpace: 'Letter',
+      printCharSpaceNormal: 'Normal',
+      printColors: 'Colors',
+      printBg: 'BG',
+      printFg: 'FG',
+      printLoad: 'Print preview ready',
+      printWatermark: 'Watermark',
+      printWMText: 'Text',
+      printWMRows: 'Rows',
+      printWMCols: 'Cols',
+      printWMOpacity: 'Opacity',
+      printBtn: 'Print',
+      btnLang: '中',
+    }
+  };
+
+  let lang = 'zh';
+
+  function t(key) {
+    return (LOCALE[lang] && LOCALE[lang][key]) || (LOCALE.zh[key]) || key;
+  }
+
+  function fmt(str, data) {
+    return str.replace(/\{(\w+)\}/g, function(m, k) { return data[k] !== undefined ? data[k] : m; });
+  }
+
+  // ── Persist ──
+  async function loadConfig() {
+    try {
+      const res = await fetch('/api/config');
+      if (res.ok) return await res.json();
+    } catch (_) {}
+    return {};
+  }
+  async function saveConfig(obj) {
+    try {
+      const res = await fetch('/api/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(obj),
+      });
+      if (res.ok) return await res.json();
+    } catch (_) {}
+    return null;
+  }
+
+  // ── Config state (loaded async) ──
+  let cfg = {};
+
+  // ── Theme ──
+  function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+  }
+  function getThemeFromURL() {
+    const p = new URLSearchParams(window.location.search);
+    return p.get('theme') === 'light' ? 'light' : 'dark';
+  }
+  function setURLTheme(t) {
+    const u = new URL(window.location);
+    u.searchParams.set('theme', t);
+    window.history.replaceState(null, '', u);
+  }
+
+  document.getElementById('theme-toggle').addEventListener('click', function(){
+    const r = document.documentElement;
+    const t = r.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    r.setAttribute('data-theme', t);
+    setURLTheme(t);
+    saveConfig({ theme: t });
+  });
+
+  // ── Language ──
+
+  function applyLang() {
+    document.documentElement.setAttribute('lang', lang === 'en' ? 'en' : 'zh-CN');
+    document.title = (isDirty ? '* ' : '') + t('title');
+    document.getElementById('app-title').textContent = t('title');
+    document.getElementById('btn-open-text').textContent = t('open');
+    document.getElementById('btn-save-text').textContent = t('save');
+    document.getElementById('btn-print-text').textContent = t('print');
+    document.getElementById('btn-print-exec-text').textContent = t('printBtn');
+    document.getElementById('btn-print-close-text').textContent = t('printClose');
+    document.getElementById('print-opt-portrait').textContent = t('printPortrait');
+    document.getElementById('print-opt-landscape').textContent = t('printLandscape');
+    document.getElementById('btn-print-toggle-settings').title = t('printSettings');
+    document.getElementById('ps-label-margins').textContent = t('printMargins');
+    document.getElementById('ps-label-typo').textContent = t('printTypography');
+    document.getElementById('ps-label-ls').textContent = t('printLineSpace');
+    document.getElementById('ps-label-cs').textContent = t('printCharSpace');
+    document.getElementById('ps-label-colors').textContent = t('printColors');
+    document.getElementById('ps-label-bg').textContent = t('printBg');
+    document.getElementById('ps-label-fg').textContent = t('printFg');
+    document.getElementById('ps-label-watermark').textContent = t('printWatermark');
+    document.getElementById('ps-label-wm-text').textContent = t('printWMText');
+    document.getElementById('ps-label-wm-rows').textContent = t('printWMRows');
+    document.getElementById('ps-label-wm-cols').textContent = t('printWMCols');
+    document.getElementById('ps-label-wm-opacity').textContent = t('printWMOpacity');
+    document.getElementById('ps-label-mt').textContent = t('printTop');
+    document.getElementById('ps-label-mb').textContent = t('printBottom');
+    document.getElementById('ps-label-ml').textContent = t('printLeft');
+    document.getElementById('ps-label-mr').textContent = t('printRight');
+    document.getElementById('btn-help-text').textContent = t('help');
+    document.getElementById('btn-lang').textContent = t('btnLang');
+    document.getElementById('pane-editor-label').textContent = t('editor');
+    document.getElementById('pane-preview-label').textContent = t('preview');
+    document.getElementById('pane-editor-hint').textContent = t('editorHint');
+    document.getElementById('drop-label').textContent = t('dropLabel');
+    document.getElementById('status-hint').textContent = t('statusHint');
+    updateStats();
+    // update help link
+    const curTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+    document.getElementById('btn-help').onclick = function() {
+      window.open('help.html?theme=' + curTheme + '&lang=' + lang, '_blank');
+    };
+  }
+
+  document.getElementById('btn-lang').addEventListener('click', function(){
+    lang = (lang === 'zh') ? 'en' : 'zh';
+    applyLang();
+    saveConfig({ lang: lang });
+  });
+
+  // ── Layout ──
+  const LAYOUTS_DESKTOP = ['split', 'editor', 'preview'];
+  const LAYOUTS_MOBILE = ['editor', 'preview'];
+  let layoutMode = 'split';
+
+  function applyLayout() {
+    const container = document.querySelector('.main-container');
+    container.className = 'main-container layout-' + layoutMode;
+    document.getElementById('btn-layout').textContent =
+      layoutMode === 'split' ? 'E+P' : layoutMode === 'editor' ? 'E' : 'P';
+  }
+
+  function cycleLayout() {
+    const modes = window.innerWidth <= 720 ? LAYOUTS_MOBILE : LAYOUTS_DESKTOP;
+    const idx = modes.indexOf(layoutMode);
+    layoutMode = modes[(idx + 1) % modes.length];
+    applyLayout();
+    saveConfig({ layout: layoutMode });
+  }
+
+  document.getElementById('btn-layout').addEventListener('click', cycleLayout);
+
+  // ── Elements ──
+  const editor = document.getElementById('editor');
+  const preview = document.getElementById('preview');
+  const charCount = document.getElementById('char-count');
+  const lineCount = document.getElementById('line-count');
+  const dropOverlay = document.getElementById('drop-overlay');
+  const toastEl = document.getElementById('toast');
+  let toastTimer = null;
+
+  // ── File handle (direct read/write) ──
+  let currentFileHandle = null;
+  let currentFileName = null;
+
+  // ── Dirty flag (unsaved changes) ──
+  let isDirty = false;
+
+  function markClean() {
+    if (isDirty) {
+      isDirty = false;
+      document.title = t('title');
+    }
+  }
+
+  function markDirty() {
+    if (!isDirty) {
+      isDirty = true;
+      document.title = '* ' + t('title');
+    }
+  }
+
+  window.addEventListener('beforeunload', function(e) {
+    if (isDirty) {
+      e.preventDefault();
+      e.returnValue = '';
+    }
+  });
+
+  // ── Debounced render ──
+  let renderRafId = null;
+  function scheduleRender() {
+    if (renderRafId) cancelAnimationFrame(renderRafId);
+    renderRafId = requestAnimationFrame(function() {
+      renderRafId = null;
+      render();
+    });
+  }
+
+  // ── Toast ──
+  function toast(msg) {
+    if (toastTimer) clearTimeout(toastTimer);
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 2500);
+  }
+
+  // ── Parse single line (using @ commands) ──
+  function parseLine(line) {
+    let remaining = line;
+    const result = { text: line, isTitle: false, color: null, textAlign: null, fontSize: null, marginLeft: null, marginTop: null };
+    let changed = true;
+    while (changed) {
+      changed = false;
+      let m = remaining.match(/^@title\s+/);
+      if (m) { remaining = remaining.slice(m[0].length); result.isTitle = true; changed = true; continue; }
+      m = remaining.match(/^@(center|left|right)\s+/);
+      if (m) { remaining = remaining.slice(m[0].length); result.textAlign = m[1]; changed = true; continue; }
+      m = remaining.match(/^@mh(-?\d+)\s+/);
+      if (m) { remaining = remaining.slice(m[0].length); result.marginLeft = parseInt(m[1],10) + 'px'; changed = true; continue; }
+      m = remaining.match(/^@mv(-?\d+)\s+/);
+      if (m) { remaining = remaining.slice(m[0].length); result.marginTop = parseInt(m[1],10) + 'px'; changed = true; continue; }
+    }
+    result.text = remaining;
+    return result;
+  }
+
+  // ── Parse block commands (using @ syntax in @@ block) ──
+  function parseBlockCommands(str) {
+    let remaining = str;
+    const result = { color: null, textAlign: null, fontSize: null, marginLeft: null, marginTop: null };
+    let changed = true;
+    while (changed) {
+      changed = false;
+      let m = remaining.match(/^@?(red|blue|green|yellow|purple|orange|pink|cyan|white|black|gray)(?:\s+|$)/i);
+      if (m) { remaining = remaining.slice(m[0].length); result.color = m[1].toLowerCase(); changed = true; continue; }
+      m = remaining.match(/^@?0x([0-9a-fA-F]{6})(?:\s+|$)/);
+      if (m) { remaining = remaining.slice(m[0].length); result.color = '#' + m[1].toLowerCase(); changed = true; continue; }
+      m = remaining.match(/^@?(center|left|right)(?:\s+|$)/);
+      if (m) { remaining = remaining.slice(m[0].length); result.textAlign = m[1]; changed = true; continue; }
+      m = remaining.match(/^@?px(\d+)(?:\s+|$)/);
+      if (m) { remaining = remaining.slice(m[0].length); const s = parseInt(m[1],10); if (s>=6&&s<=200) result.fontSize = s+'px'; changed = true; continue; }
+      m = remaining.match(/^@?mh(-?\d+)(?:\s+|$)/);
+      if (m) { remaining = remaining.slice(m[0].length); result.marginLeft = parseInt(m[1],10) + 'px'; changed = true; continue; }
+      m = remaining.match(/^@?mv(-?\d+)(?:\s+|$)/);
+      if (m) { remaining = remaining.slice(m[0].length); result.marginTop = parseInt(m[1],10) + 'px'; changed = true; continue; }
+    }
+    return result;
+  }
+
+  // ── Parse inline @ tags (stack-based nesting) ──
+  //   @tagName  入栈叠加样式
+  //   裸 @      出栈恢复上一层样式
+  //   @@        转义输出字面 @
+  function parseInlineTags(text, baseStyle) {
+    const segments = [];
+    // styleStack[0] 始终是 baseStyle
+    const styleStack = [{ ...baseStyle }];
+    let i = 0;
+    while (i < text.length) {
+      if (text[i] === '@') {
+        // @@ → 转义字面 @
+        if (i + 1 < text.length && text[i + 1] === '@') {
+          segments.push({ text: '@', style: { ...styleStack[styleStack.length - 1] } });
+          i += 2;
+          continue;
+        }
+        // 尝试匹配 @标签名 ...
+        const rest = text.slice(i + 1);
+        let tagStyle = null;
+        let tagNameLen = 0;
+
+        // @0 → 重置为默认颜色（不继承行/块颜色）
+        if (rest.startsWith('0 ')) {
+          tagStyle = { color: 'initial' };
+          tagNameLen = 2;
+        }
+
+        // 颜色名
+        if (!tagStyle) {
+          const colorMatch = rest.match(/^(red|blue|green|yellow|purple|orange|pink|cyan|white|black|gray)\s/i);
+          if (colorMatch) { tagStyle = { color: colorMatch[1].toLowerCase() }; tagNameLen = colorMatch[0].length; }
+        }
+
+        // 十六进制色
+        if (!tagStyle) {
+          const hexMatch = rest.match(/^0x([0-9a-fA-F]{6})\s/);
+          if (hexMatch) { tagStyle = { color: '#' + hexMatch[1].toLowerCase() }; tagNameLen = hexMatch[0].length; }
+        }
+
+        // 字号
+        if (!tagStyle) {
+          const pxMatch = rest.match(/^px(\d+)\s/);
+          if (pxMatch) {
+            const s = parseInt(pxMatch[1], 10);
+            if (s >= 6 && s <= 200) { tagStyle = { fontSize: s + 'px' }; tagNameLen = pxMatch[0].length; }
+          }
+        }
+
+        // @i 斜体, @b 加粗, @u 下划线, @d 删除线
+        if (!tagStyle) {
+          const fmtMatch = rest.match(/^([iubd])\s/);
+          if (fmtMatch) {
+            const m = { i: 'italic', b: 'bold', u: 'underline', d: 'line-through' };
+            const key = fmtMatch[1];
+            if (key === 'i') tagStyle = { fontStyle: m[key] };
+            else if (key === 'b') tagStyle = { fontWeight: m[key] };
+            else tagStyle = { textDecoration: m[key] };
+            tagNameLen = fmtMatch[0].length;
+          }
+        }
+
+        if (tagStyle) {
+          // 有效标签 → 入栈，在当前栈顶样式上叠加新样式
+          const currentStyle = styleStack[styleStack.length - 1];
+          const mergedStyle = { ...currentStyle };
+          if (tagStyle.color) mergedStyle.color = tagStyle.color;
+          if (tagStyle.fontSize) mergedStyle.fontSize = tagStyle.fontSize;
+          if (tagStyle.fontStyle) mergedStyle.fontStyle = tagStyle.fontStyle;
+          if (tagStyle.fontWeight) mergedStyle.fontWeight = tagStyle.fontWeight;
+          if (tagStyle.textDecoration) mergedStyle.textDecoration = tagStyle.textDecoration;
+          styleStack.push(mergedStyle);
+          i += 1 + tagNameLen;
+          continue;
+        }
+
+        // 裸 @（后跟空格或末尾）→ 出栈恢复上一层样式
+        if (i + 1 >= text.length || text[i + 1] === ' ') {
+          if (styleStack.length > 1) styleStack.pop();
+          i++;
+          continue;
+        }
+
+        // 不认识的 @xxx → 作为字面 @ 字符
+        segments.push({ text: '@', style: { ...styleStack[styleStack.length - 1] } });
+        i++;
+      } else {
+        // 普通文本段，直到下一个 @
+        const end = text.indexOf('@', i);
+        if (end === -1) {
+          segments.push({ text: text.slice(i), style: { ...styleStack[styleStack.length - 1] } });
+          break;
+        }
+        segments.push({ text: text.slice(i, end), style: { ...styleStack[styleStack.length - 1] } });
+        i = end;
+      }
+    }
+    return segments;
+  }
+
+  // ── Helper: build a DOM element with inline tag segments ──
+  function buildInlineElement(tagName, className, segments, blockStyle) {
+    const el = document.createElement(tagName);
+    el.className = className;
+    if (blockStyle.textAlign) el.style.textAlign = blockStyle.textAlign;
+    if (blockStyle.marginLeft) el.style.marginLeft = blockStyle.marginLeft;
+    if (blockStyle.marginTop) el.style.marginTop = blockStyle.marginTop;
+    for (const seg of segments) {
+      const span = document.createElement('span');
+      span.textContent = seg.text;
+      if (seg.style.color) span.style.color = seg.style.color;
+      if (seg.style.fontSize) span.style.fontSize = seg.style.fontSize;
+      if (seg.style.fontStyle) span.style.fontStyle = seg.style.fontStyle;
+      if (seg.style.fontWeight) span.style.fontWeight = seg.style.fontWeight;
+      if (seg.style.textDecoration) span.style.textDecoration = seg.style.textDecoration;
+      el.appendChild(span);
+    }
+    return el;
+  }
+
+  function updateStats() {
+    const lines = editor.value.split('\n');
+    const totalChars = editor.value.length;
+    lineCount.textContent = fmt(t('lineFmt'), { n: lines.length });
+    charCount.textContent = fmt(t('charFmt'), { n: totalChars });
+  }
+
+  // ── Render preview ──
+  function render() {
+    const text = editor.value;
+    const lines = text.split('\n');
+    const frag = document.createDocumentFragment();
+    let activeBlock = null;
+
+    lines.forEach(function(line) {
+      if (line.startsWith('@@')) {
+        const rest = line.slice(2);
+        if (rest.trim() === '') { activeBlock = null; }
+        else { activeBlock = parseBlockCommands(rest.trim()); }
+        return;
+      }
+      if (line.trim() === '') {
+        const div = document.createElement('div');
+        div.className = 'preview-line empty-line';
+        div.innerHTML = '&nbsp;';
+        frag.appendChild(div);
+        return;
+      }
+      if (activeBlock) {
+        const segments = parseInlineTags(line, {
+          color: activeBlock.color || undefined,
+          fontSize: activeBlock.fontSize || undefined,
+        });
+        const div = buildInlineElement('div', 'preview-line', segments, activeBlock);
+        frag.appendChild(div);
+        return;
+      }
+      const parsed = parseLine(line);
+      if (parsed.isTitle) {
+        const segments = parseInlineTags(parsed.text || '\uFF08\u6807\u9898\uFF09', {
+          color: parsed.color || undefined,
+          fontSize: parsed.fontSize || undefined,
+        });
+        const h = buildInlineElement('h1', 'preview-title', segments, parsed);
+        frag.appendChild(h);
+        return;
+      }
+      const segments = parseInlineTags(parsed.text, {
+        color: parsed.color || undefined,
+        fontSize: parsed.fontSize || undefined,
+      });
+      const div = buildInlineElement('div', 'preview-line', segments, parsed);
+      frag.appendChild(div);
+    });
+
+    preview.innerHTML = '';
+    preview.appendChild(frag);
+    updateStats();
+  }
+
+  editor.addEventListener('input', function() {
+    markDirty();
+    scheduleRender();
+  });
+
+  // ── File operations (direct read/write) ──
+  function updateFileLabel() {
+    const hint = document.getElementById('status-hint');
+    hint.textContent = currentFileName ? currentFileName : t('statusHint');
+  }
+
+  async function saveFile() {
+    const content = editor.value;
+    try {
+      let handle = currentFileHandle;
+      if (!handle && 'showSaveFilePicker' in window) {
+        handle = await window.showSaveFilePicker({
+          suggestedName: currentFileName || 'document.txt',
+          types: [{ description: 'Text', accept: { 'text/plain': ['.txt'] } }]
+        });
+        currentFileHandle = handle;
+        currentFileName = handle.name;
+      }
+      if (handle) {
+        const writable = await handle.createWritable();
+        await writable.write(content);
+        await writable.close();
+        markClean();
+        updateFileLabel();
+        toast(t('savedTo') + currentFileName);
+      } else {
+        // Fallback: download
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = currentFileName || 'document.txt';
+        document.body.appendChild(a); a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        markClean();
+        toast(t('downloaded'));
+      }
+    } catch (err) {
+      if (err.name !== 'AbortError' && err.name !== 'SecurityError') {
+        toast(t('saveError') + err.message);
+      }
+    }
+  }
+
+  async function openFileFromHandle(handle) {
+    try {
+      const file = await handle.getFile();
+      const text = await file.text();
+      editor.value = text;
+      currentFileHandle = handle;
+      currentFileName = handle.name;
+      render();
+      markClean();
+      updateFileLabel();
+      toast(t('opened') + currentFileName);
+    } catch (err) {
+      toast(t('readError'));
+    }
+  }
+
+  function openFileFromBlob(file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      editor.value = e.target.result;
+      currentFileHandle = null;
+      currentFileName = file.name;
+      render();
+      markClean();
+      updateFileLabel();
+      toast(t('opened') + file.name);
+    };
+    reader.onerror = function() { toast(t('readError')); };
+    reader.readAsText(file);
+  }
+
+  async function openFile() {
+    if ('showOpenFilePicker' in window) {
+      try {
+        const [handle] = await window.showOpenFilePicker({
+          types: [{ description: 'Text', accept: { 'text/plain': ['.txt'] } }],
+          multiple: false
+        });
+        await openFileFromHandle(handle);
+      } catch (err) {
+        if (err.name !== 'AbortError') toast(t('readError'));
+      }
+    } else {
+      // Fallback for unsupported browsers
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.txt,text/plain';
+      input.onchange = function(e) {
+        const file = e.target.files[0];
+        if (file) openFileFromBlob(file);
+      };
+      input.click();
+    }
+  }
+
+  editor.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'o') { e.preventDefault(); openFile(); }
+    // Tab → insert 4 spaces
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const start = this.selectionStart;
+      const end = this.selectionEnd;
+      this.value = this.value.substring(0, start) + '    ' + this.value.substring(end);
+      this.selectionStart = this.selectionEnd = start + 4;
+      scheduleRender();
+    }
+  });
+  // Global keyboard shortcuts (intercept browser defaults)
+  document.addEventListener('keydown', function(e) {
+    const ctrl = e.ctrlKey || e.metaKey;
+    if (ctrl && (e.key === 's' || e.key === 'S')) {
+      e.preventDefault();
+      saveFile();
+      return;
+    }
+    if (ctrl && (e.key === 'e' || e.key === 'E')) {
+      e.preventDefault();
+      cycleLayout();
+      return;
+    }
+    if (ctrl && (e.key === 'p' || e.key === 'P')) {
+      e.preventDefault();
+      if (printOverlay.style.display !== 'flex') {
+        openPrintPreview();
+      }
+    }
+  });
+
+  // ── Print preview ──
+
+  // ── Print settings state ──
+  let printSettingsOpen = false;
+  const printOverlay = document.getElementById('print-overlay');
+  const printPages = document.getElementById('print-pages');
+  const printOrient = document.getElementById('print-orientation');
+
+  function getPrintSettings() {
+    return {
+      marginTop: parseInt(document.getElementById('ps-mt').value) || 20,
+      marginBottom: parseInt(document.getElementById('ps-mb').value) || 20,
+      marginLeft: parseInt(document.getElementById('ps-ml').value) || 24,
+      marginRight: parseInt(document.getElementById('ps-mr').value) || 24,
+      lineSpacing: parseFloat(document.getElementById('ps-line-spacing').value) || 1.8,
+      letterSpacing: parseFloat(document.getElementById('ps-letter-spacing').value) || 0,
+      bgColor: document.getElementById('ps-bg').value || '#ffffff',
+      fgColor: document.getElementById('ps-fg').value || '#222222',
+      wmText: document.getElementById('ps-wm-text').value || '',
+      wmRows: Math.max(0, parseInt(document.getElementById('ps-wm-rows').value) || 0),
+      wmCols: Math.max(0, parseInt(document.getElementById('ps-wm-cols').value) || 0),
+      wmOpacity: Math.min(30, Math.max(0, parseInt(document.getElementById('ps-wm-opacity').value) || 0)),
+    };
+  }
+
+  function estimateLineHeight(el, lineSpacing) {
+    if (el.classList.contains('empty-line')) return 18;
+    if (el.classList.contains('preview-title')) {
+      const fs = parseFloat(el.style.fontSize) || 26;
+      return fs * 1.4;
+    }
+    const fs = parseFloat(el.style.fontSize) || 14;
+    return fs * lineSpacing + 2;
+  }
+
+  function addWatermarkToPage(pageDiv, settings) {
+    if (!settings.wmText || settings.wmRows < 1 || settings.wmCols < 1) return;
+    const wm = document.createElement('div');
+    wm.className = 'print-watermark';
+    wm.style.setProperty('--wm-cols', String(settings.wmCols));
+    wm.style.setProperty('--wm-rows', String(settings.wmRows));
+    wm.style.setProperty('--wm-opacity', String(settings.wmOpacity));
+    const total = settings.wmRows * settings.wmCols;
+    for (let i = 0; i < total; i++) {
+      const s = document.createElement('span');
+      s.textContent = settings.wmText;
+      wm.appendChild(s);
+    }
+    pageDiv.appendChild(wm);
+  }
+
+  function buildPrintPages() {
+    const src = document.getElementById('preview');
+    const settings = getPrintSettings();
+
+    // Set CSS variables on print pages container
+    printPages.style.setProperty('--print-bg', settings.bgColor);
+    printPages.style.setProperty('--print-fg', settings.fgColor);
+    printPages.style.setProperty('--print-line-height', String(settings.lineSpacing));
+    printPages.style.setProperty('--print-letter-spacing', settings.letterSpacing > 0 ? settings.letterSpacing + 'px' : 'normal');
+    printPages.style.setProperty('--print-mt', settings.marginTop + 'px');
+    printPages.style.setProperty('--print-mb', settings.marginBottom + 'px');
+    printPages.style.setProperty('--print-ml', settings.marginLeft + 'px');
+    printPages.style.setProperty('--print-mr', settings.marginRight + 'px');
+    printPages.style.setProperty('--page-w', '780px');
+    printPages.classList.add('continuous');
+
+    // Clone content lines from preview
+    const srcLines = src.querySelectorAll('.preview-title, .preview-line');
+    const lines = [];
+    srcLines.forEach(function(el) {
+      const clone = el.cloneNode(true);
+      clone.style.cssText = el.style.cssText;
+      clone.removeAttribute('id');
+      lines.push(clone);
+    });
+
+    // Clear previous pages
+    printPages.innerHTML = '';
+
+    if (lines.length === 0) {
+      const emptyPage = document.createElement('div');
+      emptyPage.className = 'print-page';
+      emptyPage.innerHTML = '<div style="text-align:center;opacity:.3;padding:40px 0">(' + t('printLoad') + ')</div>';
+      printPages.appendChild(emptyPage);
+      return;
+    }
+
+    // ── Continuous mode ──
+    const page = document.createElement('div');
+    page.className = 'print-page';
+    page.style.padding = settings.marginTop + 'px ' + settings.marginRight + 'px ' + settings.marginBottom + 'px ' + settings.marginLeft + 'px';
+    const content = document.createElement('div');
+    content.className = 'preview-body';
+    for (const line of lines) content.appendChild(line);
+    page.appendChild(content);
+    addWatermarkToPage(page, settings);
+    printPages.appendChild(page);
+  }
+
+  function openPrintPreview() {
+    buildPrintPages();
+    printOverlay.style.display = 'flex';
+    toast(t('printLoad'));
+  }
+
+  function closePrintPreview() {
+    printOverlay.style.display = 'none';
+  }
+
+  // ── Bindings ──
+  document.getElementById('btn-print').addEventListener('click', openPrintPreview);
+  document.getElementById('btn-print-exec').addEventListener('click', function() {
+    window.print();
+  });
+  document.getElementById('btn-print-close').addEventListener('click', closePrintPreview);
+
+  document.getElementById('btn-print-toggle-settings').addEventListener('click', function() {
+    printSettingsOpen = !printSettingsOpen;
+    document.getElementById('print-settings').classList.toggle('open', printSettingsOpen);
+  });
+
+  // Opacity slider: update displayed value
+  document.getElementById('ps-wm-opacity').addEventListener('input', function() {
+    document.getElementById('ps-wm-opacity-value').textContent = this.value + '%';
+  });
+
+  // Rebuild on any settings change
+  function onSettingChange() {
+    if (printOverlay.style.display === 'flex') buildPrintPages();
+  }
+
+  printOrient.addEventListener('change', onSettingChange);
+  document.querySelectorAll('#print-settings input, #print-settings select').forEach(function(el) {
+    el.addEventListener('change', onSettingChange);
+    if (el.type === 'text') el.addEventListener('input', onSettingChange);
+    if (el.type === 'range') el.addEventListener('input', onSettingChange);
+  });
+
+  // ── Drag & drop ──
+  let dragCounter = 0;
+  document.addEventListener('dragenter', function(e) {
+    e.preventDefault(); e.stopPropagation();
+    dragCounter++;
+    if (dragCounter === 1) dropOverlay.classList.add('show');
+  });
+  document.addEventListener('dragleave', function(e) {
+    e.preventDefault(); e.stopPropagation();
+    dragCounter--;
+    if (dragCounter <= 0) { dragCounter = 0; dropOverlay.classList.remove('show'); }
+  });
+  document.addEventListener('dragover', function(e) { e.preventDefault(); e.stopPropagation(); });
+  document.addEventListener('drop', function(e) {
+    e.preventDefault(); e.stopPropagation();
+    dragCounter = 0; dropOverlay.classList.remove('show');
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      const file = files[0];
+      if (file.type.startsWith('text/') || file.name.endsWith('.txt')) {
+        openFileFromBlob(file);
+      } else { toast(t('txtOnly')); }
+    }
+  });
+
+  // ── Button bindings ──
+  document.getElementById('btn-save').addEventListener('click', saveFile);
+  document.getElementById('btn-open').addEventListener('click', openFile);
+
+  // ── Init (async: load config from server first) ──
+  showSplash(async function() {
+    cfg = await loadConfig();
+    // Theme: URL param > server config > default
+    const urlTheme = new URLSearchParams(window.location.search).get('theme');
+    const initTheme = (urlTheme === 'light' || urlTheme === 'dark') ? urlTheme : (cfg.theme || 'dark');
+    applyTheme(initTheme);
+    setURLTheme(initTheme);
+    // Language
+    const initLang = cfg.lang || 'zh';
+    lang = (initLang === 'en') ? 'en' : 'zh';
+    // Layout
+    layoutMode = cfg.layout || 'split';
+    applyLayout();
+    applyLang();
+    render();
+    markClean();
+  });
+
+})();
+</script>
+</body>
+</html>
