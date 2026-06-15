@@ -630,8 +630,8 @@ body.print-active .drop-overlay{
     document.getElementById('status-hint').textContent = t('statusHint');
     updateStats();
     // update help link
-    const curTheme = document.documentElement.getAttribute('data-theme') || 'dark';
     document.getElementById('btn-help').onclick = function() {
+      const curTheme = document.documentElement.getAttribute('data-theme') || 'dark';
       window.open('help.html?theme=' + curTheme + '&lang=' + lang, '_blank');
     };
   }
@@ -1251,24 +1251,28 @@ body.print-active .drop-overlay{
   document.getElementById('btn-save').addEventListener('click', saveFile);
   document.getElementById('btn-open').addEventListener('click', openFile);
 
-  // ── Init (async: load config from server first) ──
-  showSplash(async function() {
+  // ── Init ──
+  (async function(){
+    // Load config BEFORE splash so theme is applied when splash fades out
     cfg = await loadConfig();
     // Theme: URL param > server config > default
     const urlTheme = new URLSearchParams(window.location.search).get('theme');
     const initTheme = (urlTheme === 'light' || urlTheme === 'dark') ? urlTheme : (cfg.theme || 'dark');
     applyTheme(initTheme);
     setURLTheme(initTheme);
-    // Language
-    const initLang = cfg.lang || 'zh';
-    lang = (initLang === 'en') ? 'en' : 'zh';
-    // Layout
-    layoutMode = cfg.layout || 'editor';
-    applyLayout();
-    applyLang();
-    render();
-    markClean();
-  });
+
+    showSplash(function() {
+      // Language
+      const initLang = cfg.lang || 'zh';
+      lang = (initLang === 'en') ? 'en' : 'zh';
+      // Layout
+      layoutMode = cfg.layout || 'editor';
+      applyLayout();
+      applyLang();
+      render();
+      markClean();
+    });
+  })();
 
 })();
 </script>
